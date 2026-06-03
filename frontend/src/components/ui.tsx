@@ -1,4 +1,5 @@
 import { ReactNode } from 'react';
+import type { LucideIcon } from 'lucide-react';
 import clsx from 'clsx';
 
 export function PageHeader({
@@ -30,9 +31,18 @@ export function Spinner({ label }: { label?: string }) {
   );
 }
 
-export function EmptyState({ message }: { message: string }) {
+export function EmptyState({
+  message,
+  icon: Icon,
+}: {
+  message: string;
+  icon?: LucideIcon;
+}) {
   return (
-    <div className="py-16 text-center text-sm text-slate-400">{message}</div>
+    <div className="flex flex-col items-center gap-3 py-16 text-center text-sm text-slate-400">
+      {Icon && <Icon size={32} className="text-slate-300 dark:text-slate-600" />}
+      {message}
+    </div>
   );
 }
 
@@ -64,6 +74,13 @@ const STATUS_STYLES: Record<string, string> = {
   HIGH: 'bg-orange-100 text-orange-700 dark:bg-orange-950 dark:text-orange-300',
   MEDIUM: 'bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300',
   LOW: 'bg-slate-200 text-slate-600 dark:bg-slate-800 dark:text-slate-300',
+  // Restaurant order statuses
+  PREPARING: 'bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300',
+  SERVED: 'bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300',
+  BILLED: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300',
+  // Event statuses
+  INQUIRY: 'bg-slate-200 text-slate-600 dark:bg-slate-800 dark:text-slate-300',
+  BOOKED: 'bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300',
 };
 
 export function StatusBadge({ status }: { status: string }) {
