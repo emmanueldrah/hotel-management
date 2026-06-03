@@ -1,20 +1,27 @@
-FROM python:3.9-slim
-
+# ---- Build stage ----
+FROM node:20-alpine AS build
 WORKDIR /app
+COPY package*.json ./
+RUN npm ci
+COPY prisma ./prisma
+RUN npx prisma generate
+COPY tsconfig.json ./
+COPY src ./src
+RUN npm run build
 
-RUN apt-get update && apt-get install -y \
-    build-essential \
-    libpq-dev \
-    && rm -rf /var/lib/apt/lists/*
-
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-RUN pip install pydantic-settings httpx pytest reportlab python-jose[cryptography] passlib[bcrypt]
-
-COPY . .
-
-# Script to wait for DB and seed
-RUN echo "#!/bin/bash\npython app/db/seed.py\nuvicorn app.main:app --host 0.0.0.0 --port 8000 --reload" > /app/start.sh
-RUN chmod +x /app/start.sh
-
-CMD ["/app/start.sh"]
+# ---- Production stage ----
+FROM node:20-alpine AS production
+WORKDIR /app
+ENV NODE_ENV=production
+COPY package*.json ./
+RUN npm ci --omit=dev
+COPY prisma ./prisma
+RUN npx prisma generate
+COPY --from=build /app/dist ./dist
+# Seed script (tsx) imports from src at runtime when SEED_ON_START=true.
+COPY tsconfig.json ./
+COPY src ./src
+COPY docker-entrypoint.sh ./docker-entrypoint.sh
+RUN chmod +x docker-entrypoint.sh
+EXPOSE 4000
+ENTRYPOINT ["./docker-entrypoint.sh"]

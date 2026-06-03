@@ -1,48 +1,51 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { AuthProvider } from './context/AuthContext';
-import { ThemeProvider } from './context/ThemeContext';
+import { useEffect } from 'react';
+import { Navigate, Route, Routes } from 'react-router-dom';
+import { useAppSelector } from './store';
 import Layout from './components/Layout';
-import Login from './pages/Login';
-import Dashboard from './pages/Dashboard';
-import Rooms from './pages/Rooms';
-import Bookings from './pages/Bookings';
-import Guests from './pages/Guests';
-import Billing from './pages/Billing';
-import Housekeeping from './pages/Housekeeping';
-import Staff from './pages/Staff';
-import Notifications from './pages/Notifications';
-import Settings from './pages/Settings';
+import ProtectedRoute from './components/ProtectedRoute';
+import LoginPage from './pages/LoginPage';
+import DashboardPage from './pages/DashboardPage';
+import RoomsPage from './pages/RoomsPage';
+import ReservationsPage from './pages/ReservationsPage';
+import GuestsPage from './pages/GuestsPage';
+import InvoicesPage from './pages/InvoicesPage';
+import HousekeepingPage from './pages/HousekeepingPage';
+import MaintenancePage from './pages/MaintenancePage';
+import ReportsPage from './pages/ReportsPage';
+import StaffPage from './pages/StaffPage';
+import NotFoundPage from './pages/NotFoundPage';
 
-const queryClient = new QueryClient();
+export default function App() {
+  const theme = useAppSelector((s) => s.theme.mode);
 
-function App() {
+  useEffect(() => {
+    const root = document.documentElement;
+    if (theme === 'dark') root.classList.add('dark');
+    else root.classList.remove('dark');
+  }, [theme]);
+
   return (
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider>
-        <AuthProvider>
-          <Router>
-            <Routes>
-              <Route path="/login" element={<Login />} />
-              <Route path="/" element={<Layout />}>
-                <Route index element={<Dashboard />} />
-                <Route path="rooms" element={<Rooms />} />
-                <Route path="bookings" element={<Bookings />} />
-                <Route path="guests" element={<Guests />} />
-                <Route path="billing" element={<Billing />} />
-                <Route path="housekeeping" element={<Housekeeping />} />
-                <Route path="staff" element={<Staff />} />
-                <Route path="notifications" element={<Notifications />} />
-                <Route path="settings" element={<Settings />} />
-              </Route>
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
-          </Router>
-        </AuthProvider>
-      </ThemeProvider>
-    </QueryClientProvider>
+    <Routes>
+      <Route path="/login" element={<LoginPage />} />
+      <Route
+        element={
+          <ProtectedRoute>
+            <Layout />
+          </ProtectedRoute>
+        }
+      >
+        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        <Route path="/dashboard" element={<DashboardPage />} />
+        <Route path="/rooms" element={<RoomsPage />} />
+        <Route path="/reservations" element={<ReservationsPage />} />
+        <Route path="/guests" element={<GuestsPage />} />
+        <Route path="/invoices" element={<InvoicesPage />} />
+        <Route path="/housekeeping" element={<HousekeepingPage />} />
+        <Route path="/maintenance" element={<MaintenancePage />} />
+        <Route path="/staff" element={<StaffPage />} />
+        <Route path="/reports" element={<ReportsPage />} />
+      </Route>
+      <Route path="*" element={<NotFoundPage />} />
+    </Routes>
   );
 }
-
-export default App;
