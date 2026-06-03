@@ -2,15 +2,21 @@ import { useState } from 'react';
 import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom';
 import {
   Bed,
+  Bell,
   CalendarCheck,
+  CalendarRange,
   ClipboardList,
   FileText,
   LayoutDashboard,
   LogOut,
   Menu,
   Moon,
+  Package,
+  ScrollText,
+  Settings,
   Sparkles,
   Sun,
+  UtensilsCrossed,
   Users,
   Wrench,
   X,
@@ -37,8 +43,17 @@ const NAV: NavItem[] = [
   { to: '/invoices', label: 'Billing', icon: FileText, permission: 'invoices' },
   { to: '/housekeeping', label: 'Housekeeping', icon: ClipboardList, permission: 'housekeeping' },
   { to: '/maintenance', label: 'Maintenance', icon: Wrench, permission: 'maintenance' },
+  { to: '/restaurant', label: 'Restaurant', icon: UtensilsCrossed, permission: 'restaurant' },
+  { to: '/inventory', label: 'Inventory', icon: Package, permission: 'inventory' },
+  { to: '/events', label: 'Events', icon: CalendarRange, permission: 'events' },
   { to: '/staff', label: 'Staff', icon: UserCog, permission: 'staff' },
   { to: '/reports', label: 'Reports', icon: BarChart3, permission: 'reports' },
+  { to: '/audit', label: 'Audit Logs', icon: ScrollText, permission: 'audit' },
+];
+
+const SECONDARY_NAV: { to: string; label: string; icon: typeof Bed }[] = [
+  { to: '/notifications', label: 'Notifications', icon: Bell },
+  { to: '/settings', label: 'Settings', icon: Settings },
 ];
 
 export default function Layout() {
@@ -72,8 +87,27 @@ export default function Layout() {
             <p className="text-xs text-slate-400">Hotel Management</p>
           </div>
         </div>
-        <nav className="space-y-1 p-3">
+        <nav className="h-[calc(100vh-4rem)] space-y-1 overflow-y-auto p-3">
           {items.map((item) => (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              onClick={() => setOpen(false)}
+              className={({ isActive }) =>
+                `flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition ${
+                  isActive
+                    ? 'bg-brand-50 text-brand-700 dark:bg-brand-950 dark:text-brand-300'
+                    : 'text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800'
+                }`
+              }
+            >
+              <item.icon size={18} />
+              {item.label}
+            </NavLink>
+          ))}
+
+          <div className="my-2 border-t border-slate-200 dark:border-slate-800" />
+          {SECONDARY_NAV.map((item) => (
             <NavLink
               key={item.to}
               to={item.to}

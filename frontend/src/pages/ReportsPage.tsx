@@ -1,5 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
+import { Download } from 'lucide-react';
 import { fetchOne } from '@/lib/queries';
+import { downloadCsv } from '@/lib/csv';
 import { Card, PageHeader, Spinner } from '@/components/ui';
 
 interface RevenueReport {
@@ -25,9 +27,32 @@ export default function ReportsPage() {
 
   if (revenue.isLoading || occupancy.isLoading || guests.isLoading) return <Spinner label="Building reports…" />;
 
+  const exportAll = () => {
+    const rows = [
+      { metric: 'Total revenue', value: revenue.data?.totalRevenue ?? 0 },
+      { metric: 'Transactions', value: revenue.data?.transactions ?? 0 },
+      { metric: 'Occupancy rate (%)', value: occupancy.data?.occupancyRate ?? 0 },
+      { metric: 'Occupied rooms', value: occupancy.data?.occupiedRooms ?? 0 },
+      { metric: 'Total rooms', value: occupancy.data?.totalRooms ?? 0 },
+      { metric: 'Total guests', value: guests.data?.totalGuests ?? 0 },
+      { metric: 'VIP guests', value: guests.data?.vipGuests ?? 0 },
+      ...(revenue.data?.byMethod ?? []).map((m) => ({ metric: `Revenue · ${m.method}`, value: m.amount })),
+      ...(guests.data?.byTier ?? []).map((t) => ({ metric: `Guests · ${t.tier}`, value: t.count })),
+    ];
+    downloadCsv('hms-report.csv', rows);
+  };
+
   return (
     <div>
-      <PageHeader title="Reports & Analytics" subtitle="Operational and financial summaries" />
+      <PageHeader
+        title="Reports & Analytics"
+        subtitle="Operational and financial summaries"
+        actions={
+          <button className="btn-secondary" onClick={exportAll}>
+            <Download size={16} /> Export CSV
+          </button>
+        }
+      />
 
       <div className="grid gap-6 md:grid-cols-3">
         <Card>
